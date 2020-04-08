@@ -75,13 +75,13 @@ def parse_cursor(data):
     return imgs
 
 
-def highlight_cursor(src_img, radius, xhot, yhot):
+def highlight_cursor(src_cursor, radius, xhot, yhot):
     size = radius * 2
     img = Image.new('RGBA', (size, size), '#00000000')
     draw = ImageDraw.Draw(img)
-    p = (size - src_img.width)//2 - 1
-    draw.ellipse([(0, 0), (2*radius-1, 2*radius-1)], fill='#'+args.color)
-    img.alpha_composite(src_img, (p+xhot, p+xhot))
+    #p = (size - src_cursor.width)//2 - 1
+    draw.ellipse([(0, 0), (size-1, size-1)], fill='#'+args.color)
+    img.alpha_composite(src_cursor, (radius-xhot-1, radius-yhot-1))
     return img, radius-1, radius-1
 
 def process_cursor(fpath, outfile):
@@ -111,7 +111,8 @@ def main():
             process_cursor(cursor, target)
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Highlights X cursors.')
+    parser = argparse.ArgumentParser(
+        description='Generates highlighted X11 cursors.')
     parser.add_argument('output_dir',nargs=1,
                     help='cursor output directory')
     parser.add_argument('--input-dir',
@@ -119,7 +120,7 @@ def parse_args():
                     help='path to cursors')
     parser.add_argument('--scale', type=float, default=1.25,
                     help='highlight scale [1.25]')
-    parser.add_argument('--color', default='ffff007f',
+    parser.add_argument('--color', default='ffff008f',
                     help='highlight color rrggbbaa')
     return parser.parse_args()
 
