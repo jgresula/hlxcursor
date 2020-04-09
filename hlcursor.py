@@ -77,11 +77,19 @@ def parse_cursor(data):
 
 def highlight_cursor(src_cursor, radius, xhot, yhot):
     size = radius * 2
-    img = Image.new('RGBA', (size, size), '#00000000')
-    draw = ImageDraw.Draw(img)
-    #p = (size - src_cursor.width)//2 - 1
-    draw.ellipse([(0, 0), (size-1, size-1)], fill='#'+args.color)
-    img.alpha_composite(src_cursor, (radius-xhot-1, radius-yhot-1))
+    if False:
+        hi = 4
+        hisize = hi * size
+        img = Image.new('RGBA', (hisize, hisize), '#00000000')
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([(0, 0), (hisize-1, hisize-1)], fill='#'+args.color)
+        img = img.resize((size, size), Image.LANCZOS)
+    else:
+        img = Image.new('RGBA', (size, size), '#00000000')
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([(0, 0), (size-1, size-1)], fill='#'+args.color)
+    img.alpha_composite(src_cursor, (max(0, radius-xhot-1),
+                                     max(0, radius-yhot-1)))
     return img, radius-1, radius-1
 
 def process_cursor(fpath, outfile):
@@ -90,7 +98,6 @@ def process_cursor(fpath, outfile):
     for (width, height, xhot, yhot, delay, pixels) in parse_cursor(data):
         img = Image.frombytes('RGBA', (width, height), pixels)
         new_width = int(args.scale*width)
-        assert not new_width % 2
         hi_img, new_xhot, new_yhot = highlight_cursor(
             img, new_width, xhot, yhot)
         fpath = "/tmp/cursor{}.png".format(width)
@@ -118,8 +125,8 @@ def parse_args():
     parser.add_argument('--input-dir',
                     default='/usr/share/icons/DMZ-White/cursors/',
                     help='path to cursors')
-    parser.add_argument('--scale', type=float, default=1.25,
-                    help='highlight scale [1.25]')
+    parser.add_argument('--scale', type=float, default=1,
+                    help='highlight scale [1]')
     parser.add_argument('--color', default='ffff008f',
                     help='highlight color rrggbbaa')
     return parser.parse_args()
